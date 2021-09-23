@@ -49,10 +49,11 @@ if [[ ! -f cache/tdmelodic_original.csv ]]; then
       -m unidic \
       --input cache/neologd_modified.csv \
       --output cache/tdmelodic_original.csv
+
+  echo "sleep 30 seconds, waiting for tdmelodic_original.csv fully saved."
+  sleep 30
 fi
 
-echo "sleep 30 seconds, waiting for tdmelodic_original.csv fully saved."
-sleep 30
 
 if [[ ! -f cache/tdmelodic.csv ]]; then
   echo "- Postprocess"
@@ -65,6 +66,20 @@ fi
 # cp ${WORKDIR}/tdmelodic_original.csv ${WORKDIR}/tdmelodic.csv # backup
 
 # cp ${WORKDIR}/tdmelodic.csv ${WORKDIR}/tdmelodic.csv.bak
+
+if [[ ! -d mecab-unidic-neologd/build ]]; then
+  echo "- Generate installer scripts"
+  docker run -v $(pwd):/root/workspace -v $(pwd)/cache:/root/workspace/cache -v $(pwd)/docker:/root/workspace/scripts tdmelodic:latest \
+    /root/workspace/scripts/gen_installer.sh \
+    --neologd /root/workspace/mecab-unidic-neologd \
+    --unidic /root/workspace/cache/unidic-mecab_kana-accent-2.1.2_src.zip \
+    --dictionary /root/workspace/cache/tdmelodic.csv
+
+    mv mecab-unidic-neologd/build/unidic-mecab_kana-accent-2.1.2_src.zip mecab-unidic-neologd/
+    chmod +x mecab-unidic-neologd/bin/*
+    chmod +x mecab-unidic-neologd/libexec/*
+fi
+
 
 
 # docker run \

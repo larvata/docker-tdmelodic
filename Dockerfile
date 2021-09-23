@@ -1,19 +1,20 @@
-# FROM tdmelodic:latest
+FROM alpine:3.14.2 as build
 
-# WORKDIR /tmp
+ENV MECAB_SRC https://drive.google.com/uc?export=download&id=0B4y35FiV1wh7cENtOXlicTFaRUE
 
-# COPY mecab-unidic-neologd ./mecab-unidic-neologd
+RUN apk add --no-cache bash curl openssl wget sudo autoconf automake build-base &&\
+  wget -q -O - $MECAB_SRC | tar -xzf - -C /tmp &&\
+  cd /tmp/mecab-[0-9]* &&\
+  ./configure &&\
+  make &&\
+  make check &&\
+  make install
 
-# RUN unxz -k `ls mecab-unidic-neologd/seed/*.xz | tail -n 1`
+COPY mecab-unidic-neologd /workspace
+WORKDIR /workspace
+RUN ./libexec/install-mecab-unidic_kana-accent.sh
+RUN yes yes | ./bin/install-tdmelodic --prefix `mecab-config --dicdir`/tdmelodic
+WORKDIR /
+RUN rm -rf /workspace
 
-# RUN tdmelodic-neologd-preprocess \
-#     --input `ls mecab-unidic-neologd/seed/mecab-unidic-user-dict-seed*.csv | tail -n 1` \
-#     --output /tmp/neologd_modified.csv
 
-
-# RUN tdmelodic-convert \
-#     -m unidic \
-#     --input /tmp/neologd_modified.csv \
-#     --output tdmelodic_original.csv
-
-# RUN ls
