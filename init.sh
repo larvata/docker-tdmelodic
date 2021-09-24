@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 
-PROXY="https_proxy=http://192.168.1.137:8119"
+# PROXY="--build-arg https_proxy=http://192.168.1.137:8119"
+PROXY=""
 
 TDMELODIC_DIR=tdmelodic
 MECAB_DIC_DIR=mecab-unidic-neologd
@@ -35,7 +36,7 @@ cp -f cache/$UNIDIC_ZIP $MECAB_DIC_DIR
 
 echo "- 05 Build tdmelodic"
 cd tdmelodic
-docker build --build-arg $PROXY -t tdmelodic:latest .
+docker build $PROXY -t tdmelodic:latest .
 cd ..
 
 
@@ -92,4 +93,4 @@ fi
 
 
 echo "- 11 Build mecab-tdmelodic-lite"
-docker build --squash --build-arg $PROXY -t mecab-tdmelodic-lite .
+docker build --squash $PROXY -t mecab-tdmelodic-lite .
