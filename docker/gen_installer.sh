@@ -118,6 +118,7 @@ sed -e "s/mecab-unidic-neologd/${NAME_OF_DIC}/g;
         s/^SEED_FILE_NAME=.*$/SEED_FILE_NAME=${NAME_OF_DIC}.${YMD}.csv/g;
         s/.csv.xz/.csv/g;
         s/^cp.*$/cp \${BASEDIR}\/..\/seed\/\${SEED_FILE_NAME} \${TDMELODIC_DIC_DIR}/g;
+        /^.\/configure/i autoreconf -i -f;
         /^unxz/d;
         /^*curl/d" \
     ${IN} > ${OUT}
