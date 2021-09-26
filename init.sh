@@ -1,33 +1,39 @@
 #!/usr/bin/env bash
 
-# PROXY="--build-arg https_proxy=http://192.168.1.137:8119"
-PROXY=""
-
 TDMELODIC_DIR=tdmelodic
 MECAB_DIC_DIR=mecab-unidic-neologd
 UNIDIC_ZIP=unidic-mecab_kana-accent-2.1.2_src.zip
 
+
+if [[ ! -z $http_proxy ]]; then
+  DOCKER_BUILD_PROXY="--build-arg http_proxy=$http_proxy "
+fi
+
+if [[ ! -z $https_proxy ]]; then
+  DOCKER_BUILD_PROXY+="--build-arg https_proxy=$https_proxy"
+fi
+
+
 echo "- 01 Prepare tdmelodic"
 if [[ ! -d $MECAB_DIC_DIR ]]; then
-    git clone --depth 1 https://github.com/PKSHATechnology-Research/tdmelodic
+  git clone --depth 1 https://github.com/PKSHATechnology-Research/tdmelodic
 fi
-cd $TDMELODIC_DIR && git pull --depth 1 && cd ..
+(cd $TDMELODIC_DIR && git pull --depth 1)
 
 
 echo "- 02 Prepare mecab-unidic-neologd"
 if [[ ! -d $MECAB_DIC_DIR ]]; then
     git clone --depth 1 https://github.com/neologd/mecab-unidic-neologd/
 fi
-cd $MECAB_DIC_DIR && git pull --depth 1 && cd ..
+(cd $MECAB_DIC_DIR && git pull --depth 1)
 
 
 echo "- 03 Download unidic-mecab_kana-accent-2.1.2_src"
 mkdir cache 2> /dev/null
 if [[ ! -f cache/$UNIDIC_ZIP ]]; then
-  cd cache
-  wget https://unidic.ninjal.ac.jp/unidic_archive/cwj/2.1.2/unidic-mecab_kana-accent-2.1.2_src.zip
-  cd ..
+  (cd cache &&  wget https://unidic.ninjal.ac.jp/unidic_archive/cwj/2.1.2/unidic-mecab_kana-accent-2.1.2_src.zip)
 fi
+
 
 echo "- 04 Copy unidic-mecab_kana-accent-2.1.2_src"
 cp -f cache/$UNIDIC_ZIP $TDMELODIC_DIR
@@ -35,9 +41,7 @@ cp -f cache/$UNIDIC_ZIP $MECAB_DIC_DIR
 
 
 echo "- 05 Build tdmelodic"
-cd tdmelodic
-docker build $PROXY -t tdmelodic:latest .
-cd ..
+(cd tdmelodic && docker build $DOCKER_BUILD_HTTP $DOCKER_BUILD_HTTPS -t tdmelodic:latest .)
 
 
 echo "- 06 Prepare dict"
@@ -93,4 +97,4 @@ fi
 
 
 echo "- 11 Build mecab-tdmelodic-lite"
-docker build --squash $PROXY -t mecab-tdmelodic-lite .
+docker build --squash $DOCKER_BUILD_HTTP $DOCKER_BUILD_HTTPS -t mecab-tdmelodic-lite .
